@@ -1,0 +1,197 @@
+<html>
+<head/>
+<body>
+<p>1. Изобразить многоугольник заданием списка координат вершин;</p>
+<p>2. Заполнить многоугольник цветом</p>
+<p>а) Алгоритмом с затравкой</p>
+<p>б) Алгоритмом пересечения горизонтальных прямых
+	с отрезками многоугольника</p>
+	<canvas id='less02' width='200' height='200'>
+		<script>
+			var canvas=document.getElementById('less02');
+			var ctx = canvas.getContext('2d');
+			var x, y, xz=0, yz=0, xs=[], ys=[];
+			var xleft=canvas.width, xright=0;
+			var ybtm=0, ytop=canvas.height;
+			var count=0, kant=0;
+			function line_ESE(x0, y0, x1, y1) {
+				var delta = 0;
+				var ya=0;
+				for (i=0; i<(x1-x0); i++) {
+					if (delta>=(x1-x0)) {
+						delta-=2*(x1-x0);
+						ya++;
+					}
+					delta+=2*(y1-y0);
+					ctx.fillRect(x0+i, y0+ya, 1, 1);
+				}
+			}
+			function line_SSE(x0, y0, x1, y1) {
+				var delta = 0;
+				var xa=0;
+				for (i=0; i<(y1-y0); i++) {
+					if (delta>=(y1-y0)) {
+						delta-=2*(y1-y0);
+						xa++;
+					}
+					delta+=2*(x1-x0);
+					ctx.fillRect(x0+xa, y0+i, 1, 1);
+				}
+			}
+			function line_ENE(x0, y0, x1, y1) {
+				var delta = 0;
+				var ya=0;
+				for (i=0; i<(x1-x0); i++) {
+					if (delta>=(x1-x0)) {
+						delta-=2*(x1-x0);
+						ya--;
+					}
+					delta-=2*(y1-y0);
+					ctx.fillRect(x0+i, y0+ya, 1, 1);
+				}
+			}
+			function line_NNE(x0, y0, x1, y1) {
+				var delta = 0;
+				var xa=0;
+				for (i=0; i<(y0-y1); i++) {
+					if (delta>=(y0-y1)) {
+						delta-=2*(y0-y1);
+						xa++;
+					}
+					delta+=2*(x1-x0);
+					ctx.fillRect(x0+xa, y0-i, 1, 1);
+				}
+			}
+			function line(x0, y0, x1, y1) {
+				var a0, a1, b0, b1;
+				if (x0>x1) { a0=x1; a1=x0; b0=y1; b1=y0; }
+				else { a0=x0; a1=x1; b0=y0; b1=y1; }
+				if (b1>b0) {
+					if ((b1-b0)<(a1-a0)) {
+						line_ESE(a0, b0, a1, b1);
+					} else line_SSE(a0, b0, a1, b1);
+				} else if ((b0-b1)<(a1-a0)) {
+						line_ENE(a0, b0, a1, b1);
+					} else line_NNE(a0, b0, a1, b1);
+			}
+			function fill_area(x,y) {
+				var pixel=ctx.getImageData(x,y,1,1);
+				var data=pixel.data;
+				ctx.fillStyle='#CCFFAA';
+				if (data[3]==0) {
+					ctx.fillRect(x,y, 1, 1);
+				}
+				if (!ctx.getImageData(x,y-1,1,1).data[3])
+					fill_area(x,y-1);
+				if (!ctx.getImageData(x,y+1,1,1).data[3])
+					fill_area(x,y+1);
+				if (!ctx.getImageData(x-1,y,1,1).data[3])
+					fill_area(x-1,y);
+				if (!ctx.getImageData(x+1,y,1,1).data[3])
+					fill_area(x+1,y);
+			}
+			function reabris() {
+				ctx.fillStyle='#000000';
+				for (r=0; r<xs.length-1; r++) line(xs[r],ys[r],xs[r+1],ys[r+1]);
+				line(xs[xs.length-1],ys[xs.length-1],xs[0],ys[0]);
+			}
+			function fill_stripes() {
+				var k=[], i=0, co, pr=0, t, j, jj;
+				var al=[];
+				ctx.fillStyle='#AAFFCC';
+				for (y=ytop; y<ybtm; y++) {
+					for (x=xleft; x<xright+1; x++) {
+						if ((!ctx.getImageData(x-1,y,1,1).data[3])
+						&& (ctx.getImageData(x,y,1,1).data[3])) {
+							co=x+1;
+							while ((ctx.getImageData(co,y,1,1).data[3]) && (i%2==0))
+								co++;
+							if (co==x+1) {
+								al[i]=x;
+								k[i]=x;
+							}
+							else { al[i]=co-1; k[i]=co-1; }
+							i++;
+						}
+					}
+					al[al.length]=xright;
+					for (j=al.length-1; j>-1; j--)
+						al[j+1]=al[j];
+					al[0]=xleft;
+					for (j=0; j<al.length-1; j++)
+						for (jj=0; jj<xs.length; jj++)
+							if ((al[j]<=xs[jj])&&(xs[jj]<al[j+1])) {
+								if ((jj==0)&&(y==ys[jj])) {
+									if ((ys[0]>ys[1])&&(ys[0]>ys[ys.length-1]))
+										for (jt=k.length-1; jt>j-2; jt--)
+											k[jt+1]=k[jt];
+									if ((ys[0]<ys[1])&&(ys[0]<ys[ys.length-1]))
+										for (jt=j-1; jt<k.length; jt++)
+											k[jt]=k[jt+1];
+								}
+								if ((jj==xs.length-1)&&(y==ys[jj])) {
+									if ((ys[jj]>ys[0])&&(ys[jj]>ys[jj-1]))
+										for (jt=k.length-1; jt>j-2; jt--)
+											k[jt+1]=k[jt];
+									if ((ys[jj]<ys[0])&&(ys[jj]<ys[jj-1])) {
+										for (jt=j-1; jt<k.length; jt++)
+											k[jt]=k[jt+1];}
+								}
+								if ((jj>0)&&(jj<xs.length-1)&&(y==ys[jj])) {
+									if ((ys[jj]>ys[jj+1])&&(ys[jj]>ys[jj-1]))
+										for (jt=k.length-1; jt>j-2; jt--)
+											k[jt+1]=k[jt];
+									if ((ys[jj]<ys[jj+1])&&(ys[jj]<ys[jj-1]))
+										for (jt=j-1; jt<k.length; jt++)
+											k[jt]=k[jt+1];
+								}
+							}
+					for (j=0; j<k.length/2; j++)
+						line(k[2*j]+1,y,k[2*j+1],y);
+					i=0; pr=0; k=[]; al=[]; s='';
+				}
+			}
+			function onClick() {
+				if (event.which == 1) {
+					ctx.fillStyle='#000000';
+					line(x, y, event.offsetX,event.offsetY);
+					kant++;
+					x = event.offsetX;
+					y = event.offsetY;
+					xs[kant-1]=x;
+					ys[kant-1]=y;
+					ctx.fillRect(x, y, 1, 1);
+				}
+				if (event. which == 2) {
+					line(x, y, xz, yz);
+					if (kant%2==1)
+						fill_area(event.offsetX,event.offsetY);
+					else {
+						fill_stripes();
+						reabris();
+					}
+					kant=1; count=0; xs=[]; ys=[];
+				}
+				if (y<ytop) ytop=y;
+				if (x<xleft) xleft=x;
+				if (x>xright) xright=x;
+				if (y>ybtm) ybtm=y;
+				if (count == 0) {
+					xz=x;
+					yz=y;
+					count++;
+				}
+			}
+			for (i=0; i<canvas.height; i++) {
+				ctx.fillRect(0, i, 1, 1);
+				ctx.fillRect(canvas.width-1, i, 1, 1);
+			}
+			for (i=0; i<canvas.width; i++) {
+				ctx.fillRect(i, 0, 1, 1);
+				ctx.fillRect(i, canvas.height-1, 1, 1);
+			}
+			canvas.addEventListener('click',onClick);
+		</script>
+	</canvas>
+</body>
+</html>

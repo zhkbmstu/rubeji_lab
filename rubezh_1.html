@@ -1,0 +1,131 @@
+<html>
+<head/>
+<body>
+<p>1. Построить отрезок прямой алг. Брезенхема
+	с координатами A(20, 10) B(28, 100).</p>
+<p>2. Дан массив x-координат границ многоугольника. Отобразить в графической области</p>
+<p> совокупность горизонтальных отрезков, осуществляющих заливку данного многоугольника.</p>
+<p>Заливка осуществляется от чётного либо 0 до нечётного включительно.</p>
+<p>Учесть, что повторяющиеся элементы должны продолжаться до пропуска.</p>
+	<canvas id='midterm1' width='200' height='200'>
+		<script>
+			var canvas=document.getElementById('midterm1');
+			var ctx = canvas.getContext('2d');
+			var x=0, y=0, xz=0, yz=0, xs=[], ys=[];
+			var xleft=canvas.width, xright=0;
+			var ybtm=0, ytop=canvas.height;
+			var count=0, kant; var s='';
+			function line_ESE(x0, y0, x1, y1) {
+				var delta = 0;
+				var ya=0;
+				for (i=0; i<(x1-x0); i++) {
+					if (delta>=(x1-x0)) {
+						delta-=2*(x1-x0);
+						ya++;
+					}
+					delta+=2*(y1-y0);
+					ctx.fillRect(x0+i, y0+ya, 1, 1);
+				}
+			}
+			function line_SSE(x0, y0, x1, y1) {
+				var delta = 0;
+				var xa=0;
+				for (i=0; i<(y1-y0); i++) {
+					if (delta>=(y1-y0)) {
+						delta-=2*(y1-y0);
+						xa++;
+					}
+					delta+=2*(x1-x0);
+					ctx.fillRect(x0+xa, y0+i, 1, 1);
+				}
+			}
+			function line_ENE(x0, y0, x1, y1) {
+				var delta = 0;
+				var ya=0;
+				for (i=0; i<(x1-x0); i++) {
+					if (delta>=(x1-x0)) {
+						delta-=2*(x1-x0);
+						ya--;
+					}
+					delta-=2*(y1-y0);
+					ctx.fillRect(x0+i, y0+ya, 1, 1);
+				}
+			}
+			function line_NNE(x0, y0, x1, y1) {
+				var delta = 0;
+				var xa=0;
+				for (i=0; i<(y0-y1); i++) {
+					if (delta>=(y0-y1)) {
+						delta-=2*(y0-y1);
+						xa++;
+					}
+					delta+=2*(x1-x0);
+					ctx.fillRect(x0+xa, y0-i, 1, 1);
+				}
+			}
+			function line(x0, y0, x1, y1) {
+				var a0, a1, b0, b1;
+				if (x0>x1) { a0=x1; a1=x0; b0=y1; b1=y0; }
+				else { a0=x0; a1=x1; b0=y0; b1=y1; }
+				if (b1>b0) {
+					if ((b1-b0)<(a1-a0)) {
+						line_ESE(a0, b0, a1, b1);
+					} else line_SSE(a0, b0, a1, b1);
+				} else if ((b0-b1)<(a1-a0)) {
+						line_ENE(a0, b0, a1, b1);
+					} else line_NNE(a0, b0, a1, b1);
+			}
+			function getRandomInt(min, max) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}
+			function reabris() {
+				ctx.fillStyle='#000000';
+				for (r=0; r<xs.length; r++) ctx.fillRect(ys[r], y, 1, 1);
+			}
+			function fill_stripe() {
+				ctx.fillStyle='#00FF66';
+				var i, j;
+				for (i=0; i<xs.length-1; i++)
+					if (Math.abs(xs[i]-xs[i+1])<=1)
+						xs.splice(i,1);
+				for (j=0; j<xs.length/2; j++) line(xs[2*j],y,xs[2*j+1],y);
+			}
+			function onClick() {
+				if (event.which == 1) {
+					ctx.fillStyle='#000000';
+					line(20, 10, 28, 100);
+				}
+				if (event. which == 2) {
+					kant=getRandomInt(3, 10);
+					y=getRandomInt(1, 200);
+					for (i=0; i<kant; i++) {
+						if (x!=0) {
+							x=getRandomInt(20*i, 20*i+20);
+						}
+						ctx.fillRect(x, y, 1, 1);
+						xs[i]=x; ys[i]=x;
+						x=getRandomInt(x, x+20);
+					}
+					/*xs=[10, 34, 35, 60, 85]; ys=[10, 34, 35, 60, 85];
+					for (i=0; i<kant; i++)
+						ctx.fillRect(xs[i], y, 1, 1);*/
+					xs[kant]=x; xs.shift();
+					ys[kant]=x; ys.shift();
+					fill_stripe(); reabris();
+					//for (i=0; i<xs.length; i++) s+=xs[i]+' '; alert(s);
+					s=''; xs=[]; ys=[];
+				}
+			}
+			for (i=0; i<canvas.height; i++) {
+				ctx.fillRect(0, i, 1, 1);
+				ctx.fillRect(canvas.width-1, i, 1, 1);
+			}
+			for (i=0; i<canvas.width; i++) {
+				ctx.fillRect(i, 0, 1, 1);
+				ctx.fillRect(i, canvas.height-1, 1, 1);
+			}
+			canvas.addEventListener('click',onClick);
+		</script>
+	</canvas>
+</body>
+</html>

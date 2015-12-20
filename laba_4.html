@@ -1,0 +1,117 @@
+<html>
+<head/>
+<body>
+<canvas id='less04' width='200' height='200'>
+<script>
+	function line1(ctx,x0,y0,x1,y1,color) {
+		var d=0;
+		var y=0;
+		var or=1;
+		if (y0>y1) or=-1;
+		for (x=0; x<(x1-x0); x++) {
+			if (d>=(x1-x0)) {
+				y++;
+				d-=2*(x1-x0);
+			}
+			d+=2*or*(y1-y0);
+			ctx.fillRect(x+x0,or*y+y0,1,1);
+		}
+	}
+	function line2(ctx,x0,y0,x1,y1,color) {
+		var d=0;
+		var x=0;
+		var or=1;
+		if (x0>x1) or=-1;
+		for (y=0; y<(y1-y0); y++) {
+			if (d>=(y1-y0)) {
+				x++;
+				d-=2*(y1-y0);
+			}
+			d+=2*or*(x1-x0);
+			ctx.fillRect(or*x+x0,y+y0,1,1);
+		}
+	}
+	function draw_line(ctx,x0,y0, x1,y1,color) {
+		ctx.fillStyle=color;
+		if (Math.abs(x1-x0)>=Math.abs(y1-y0)) {
+			if (x1>=x0) line1(ctx,x0,y0,x1,y1,color);
+		} else {
+			if (y1>=y0) line2(ctx, x0,y0,x1,y1,color);
+			else line2(ctx,x1,y1,x0,y0,color);
+		}
+		ctx.fillStyle='#000000';
+	}
+</script>
+<script>
+	var canvas=document.getElementById('less04');
+	var ctx=canvas.getContext('2d');
+	var poly=[10,10,60,20,40,70];
+	var dx=0,dy=0,angle=0,coef=1;
+	function show() {
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+		var size=poly.length/2;
+		for (i=0; i<size-1; i++)
+			draw_line(ctx,poly[2*i],poly[2*i+1],
+			poly[2*(i+1)],poly[2*(i+1)+1],'#00FF00');
+		draw_line(ctx,poly[2*(size-1)],poly[2*(size-1)+1],
+			poly[0],poly[1],'#00FF00');
+	}
+	show();
+	function MultAV(A,V) {
+		var U=[0,0,0];
+		for (k=0; k<3;k++)
+			for (j=0; j<3; j++)
+				U[k]+=A[k+j*3]*V[j];
+		V[0]=U[0]; V[1]=U[1];
+	}
+	function transform(A) {
+		size=poly.length/2;
+		for (i=0; i<size; i++) {
+			var V=[poly[2*i],poly[2*i+1],1];
+			MultAV(A,V);
+			poly[2*i]=V[0]; poly[2*i+1]=V[1];
+		}
+	}
+	function move(dx,dy) {
+		A = [	1,0,0,
+			0,1,0,
+			dx,dy,1];
+		transform(A);
+	}
+	function rot(angle) {
+		B = [	Math.cos(angle), Math.sin(angle), 0,
+			(-1)*Math.sin(angle), Math.cos(angle), 0,
+			0, 0, 1];
+		transform(B);
+	}
+	function scale(coef) {
+		C = [	coef, 0, 0,
+			0, coef, 0,
+			0, 0, 1];
+		transform(C);
+	}
+	function onClick(fn, alt1, alt2) {
+		fn(alt1,alt2);
+		show();
+	}
+	function onChange(changeVal) {
+	if (changeVal.name=='inbox1')
+		dx=changeVal.value;
+	if (changeVal.name=='inbox2')
+		dy=changeVal.value;
+	if (changeVal.name=='inbox3')
+		angle=changeVal.value;
+	if (changeVal.name=='inbox4')
+		coef=changeVal.value;
+	}
+</script>
+</canvas>
+<input style="position: fixed; left: 200px; top: 0px;" type='button' onClick='onClick(move,dx,dy)' name='button' value='move'/>
+<input style="position: fixed; left: 200px; top: 25px;" type='button' onClick='onClick(rot,angle)' name='button1' value='rot'/>
+<input style="position: fixed; left: 200px; top: 50px;" type='button' onClick='onClick(scale,coef)' name='button2' value='scale'/>
+<input style="position: fixed; width: 60px; left: 250px; top: 0px;" type='text' onchange='onChange(this)' name='inbox1' value=''/>
+<input style="position: fixed; width: 60px; left: 315px; top: 0px;" type='text' onchange='onChange(this)' name='inbox2' value=''/>
+<input style="position: fixed; width: 60px; left: 250px; top: 25px;" type='text' onchange='onChange(this)' name='inbox3' value=''/>
+<input style="position: fixed; width: 60px; left: 250px; top: 50px;" type='text' onchange='onChange(this)' name='inbox4' value=''/>
+</body>
+</html>

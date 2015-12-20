@@ -1,0 +1,53 @@
+<html>
+<head/>
+<body>
+<canvas id='midterm3' width='200' height='200'>
+<script>
+	var canvas=document.getElementById('midterm3');
+	var ctx=canvas.getContext('2d');
+	var x=getRandomInt(1,canvas.width-1);
+	var y=getRandomInt(1,canvas.height-1);
+	ctx.fillRect(x,y,2,2);
+	alert('('+x+','+y+')');
+	function getRandomInt(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	function MultAV(A,V) {
+		var U=[0,0,0];
+		for (k=0; k<3;k++)
+			for (j=0; j<3; j++)
+				U[k]+=A[k+j*3]*V[j];
+		V[0]=U[0]; V[1]=U[1];
+	}
+	function transform(A) {
+		var V=[x,y,1];
+		MultAV(A,V);
+		x=V[0]; y=V[1];
+	}
+	function move(dx,dy) {
+		A = [	1,0,0,
+			0,1,0,
+			dx,dy,1];
+		transform(A);
+	}
+	function rot(angle) {
+		B = [	Math.cos(angle), Math.sin(angle), 0,
+			(-1)*Math.sin(angle), Math.cos(angle), 0,
+			0, 0, 1];
+		transform(B);
+	}
+	rot(Math.PI/6);
+	ctx.fillStyle='#FF0000'; ctx.fillRect(x,y,2,2);
+	alert('('+x+','+y+')');
+
+	move(50,0);
+	ctx.fillStyle='#00FF00'; ctx.fillRect(x,y,2,2);
+	alert('('+x+','+y+')');
+
+	rot(-Math.PI/6);
+	ctx.fillStyle='#0000FF'; ctx.fillRect(x,y,2,2);
+	alert('('+x+','+y+')');
+</script>
+</canvas>
+</body>
+</html>
